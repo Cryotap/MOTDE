@@ -27,7 +27,7 @@ class Motde(Plugin):
     permissions = {
         "motde.command.usage": {
             "description": "Allow users to use the Motde commands.",
-            "default": False,
+            "default": "op",
             },
         }
 
