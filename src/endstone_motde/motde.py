@@ -57,43 +57,45 @@ class Motde(Plugin):
 
     def on_command(self, sender: CommandSender, command: Command, args: list[str], cf=cf) -> bool:
         if command.name == "motde":
-            if len(args) > 0:
-                con = sqlite3.connect('motdlist.db', timeout=3)
-                cursor = con.cursor()
-                if args[0] == "del":
-                    cursor.execute('delete from motds where id =?', (args[1],))
-                    con.commit()
-                    con.close()
-                    sender.send_message(f"{cf.MATERIAL_NETHERITE}Deleted!")
-                elif args[0] == "add":
-                    if len(args) > 1:
-                        a = args[1]
-                        b = ' '.join(args[2:])
-                        c = b.replace('&', '§')
-                        rows = cursor.execute("""SELECT id FROM motds WHERE id=?""", (args[1],))
+            player = sender.as_player()
+            if player is not None:
+                if len(args) > 0:
+                    con = sqlite3.connect('motdlist.db', timeout=3)
+                    cursor = con.cursor()
+                    if args[0] == "del":
                         cursor.execute('delete from motds where id =?', (args[1],))
-                        cursor.execute("""INSERT INTO motds(id,motd) VALUES (?, ?)""", (int(a), c))
                         con.commit()
                         con.close()
-                        sender.send_message(f"{cf.AQUA}Added.")
+                        sender.send_message(f"{cf.MATERIAL_NETHERITE}Deleted!")
+                    elif args[0] == "add":
+                        if len(args) > 1:
+                            a = args[1]
+                            b = ' '.join(args[2:])
+                            c = b.replace('&', '§')
+                            rows = cursor.execute("""SELECT id FROM motds WHERE id=?""", (args[1],))
+                            cursor.execute('delete from motds where id =?', (args[1],))
+                            cursor.execute("""INSERT INTO motds(id,motd) VALUES (?, ?)""", (int(a), c))
+                            con.commit()
+                            con.close()
+                            sender.send_message(f"{cf.AQUA}Added.")
+                        else:
+                            con.commit()
+                            con.close()
                     else:
+                        sender.send_message(f"{cf.MATERIAL_REDSTONE}/motde add id motd, /motde del id")
                         con.commit()
                         con.close()
                 else:
-                    sender.send_message(f"{cf.MATERIAL_REDSTONE}/motde add id motd, /motde del id")
+                    con = sqlite3.connect('motdlist.db', timeout=3)
+                    cursor = con.cursor()
+                    rows = cursor.execute("SELECT motd FROM motds WHERE motd IS NOT NULL").fetchall()
+                    n = list(rows)
+                    el = ",".join(str(element) for element in n)
+                    sender.send_message(f"{cf.AQUA} " + el)
                     con.commit()
                     con.close()
-            else:
-                con = sqlite3.connect('motdlist.db', timeout=3)
-                cursor = con.cursor()
-                rows = cursor.execute("SELECT motd FROM motds WHERE motd IS NOT NULL").fetchall()
-                n = list(rows)
-                el = ",".join(str(element) for element in n)
-                sender.send_message(f"{cf.AQUA} " + el)
-                con.commit()
-                con.close()
-                sender.send_message(f"{cf.MATERIAL_REDSTONE}/motde add id motd, /motde del id")
-                return False
+                    sender.send_message(f"{cf.MATERIAL_REDSTONE}/motde add id motd, /motde del id")
+                    return False
         return True
 
     def on_load(self) -> None:
