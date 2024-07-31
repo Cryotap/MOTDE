@@ -1,6 +1,7 @@
 import endstone.plugin
 from endstone.command import *
 from endstone.plugin import Plugin
+from endstone import Player
 from endstone import ColorFormat
 import sqlite3
 import random
@@ -17,7 +18,7 @@ class Motde(Plugin):
     commands = {
         "motde": {
             "description": "Set the motd's that the server will shullfe.",
-            "usages": ["/motde","/motde [value: str] [value: int]","/motde [value: str] [value: int] [value: message]"],
+            "usages": ["/motde", "/motde [value: str] [value: int]", "/motde [value: str] [value: int] [value: message]"],
             "permissions": ["motde.command.usage"],
         },
     }
@@ -55,8 +56,7 @@ class Motde(Plugin):
 
     def on_command(self, sender: CommandSender, command: Command, args: list[str], cf=cf) -> bool:
         if command.name == "motde":
-            player = sender.as_player()
-            if player is not None:
+            if isinstance(sender, Player):
                 if len(args) > 0:
                     con = sqlite3.connect('motdlist.db', timeout=3)
                     cursor = con.cursor()
@@ -101,7 +101,7 @@ class Motde(Plugin):
 
     def on_enable(self) -> None:
         self.logger.info("Booting Up Motde.exe!")
-        con = sqlite3.connect('motdlist.db',timeout=3)
+        con = sqlite3.connect('motdlist.db', timeout=3)
         cursor = con.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS motds(id INT PRIMARY KEY, motd TEXT)""")
         con.commit()
